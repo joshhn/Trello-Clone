@@ -9,6 +9,8 @@
         <entry key="app/src/main/res/layout-v23/activity_intro.xml" value="0.2171875" />
         <entry key="app/src/main/res/layout/activity_intro.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.21822916666666667" />
       </map>
     </option>

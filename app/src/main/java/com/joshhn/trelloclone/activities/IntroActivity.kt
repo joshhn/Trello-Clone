@@ -1,5 +1,6 @@
 package com.joshhn.trelloclone.activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.view.ViewCompat
@@ -16,6 +17,15 @@ class IntroActivity : AppCompatActivity() {
         setContentView(binding?.root)
 
         hideSystemBars()
+
+
+        binding?.tvSignInIntro?.setOnClickListener{
+            startActivity(Intent(this,SignInActivity::class.java))
+        }
+
+        binding?.tvSignUpIntro?.setOnClickListener{
+            startActivity(Intent(this,SignUpActivity::class.java))
+        }
     }
 
     private fun hideSystemBars() {
