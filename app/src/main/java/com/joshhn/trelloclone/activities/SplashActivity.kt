@@ -2,14 +2,15 @@ package com.joshhn.trelloclone.activities
 
 import android.content.Intent
 import android.graphics.Typeface
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.joshhn.trelloclone.databinding.ActivitySplashBinding
-class SplashActivity : AppCompatActivity() {
+import com.joshhn.trelloclone.firebase.FirestoreClass
+
+class SplashActivity : BaseActivity() {
 
     private var binding: ActivitySplashBinding? = null
 
@@ -25,7 +26,17 @@ class SplashActivity : AppCompatActivity() {
         binding?.tvAppName?.typeface = typeface
 
         Handler().postDelayed({
-            startActivity(Intent(this,IntroActivity::class.java))
+
+
+            var currentUserID = FirestoreClass().getCurrentUserID()
+
+            if(currentUserID.isNotEmpty()){
+                startActivity(Intent(this,MainActivity::class.java))
+            }else{
+                startActivity(Intent(this,IntroActivity::class.java))
+            }
+
+            finish()
         },2500)
 
     }

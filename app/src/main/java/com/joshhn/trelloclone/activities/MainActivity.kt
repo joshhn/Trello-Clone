@@ -1,10 +1,9 @@
 package com.joshhn.trelloclone.activities
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.joshhn.trelloclone.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private var  binding: ActivityMainBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {

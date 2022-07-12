@@ -1,14 +1,13 @@
 package com.joshhn.trelloclone.activities
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.joshhn.trelloclone.databinding.ActivityIntroBinding
 
-class IntroActivity : AppCompatActivity() {
+class IntroActivity : BaseActivity() {
 
     private var binding: ActivityIntroBinding?= null
     override fun onCreate(savedInstanceState: Bundle?) {
