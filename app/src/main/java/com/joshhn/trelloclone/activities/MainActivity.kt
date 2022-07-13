@@ -25,7 +25,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 
         binding?.navView?.setNavigationItemSelectedListener(this)
 
-        FirestoreClass().signInUser(this)
+        FirestoreClass().loadUserData(this)
 
     }
 
@@ -60,9 +60,8 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
         when (item.itemId) {
             R.id.nav_my_profile -> {
 
-                startActivityForResult(
-                    Intent(this@MainActivity, MyProfileActivity::class.java),
-                    MY_PROFILE_REQUEST_CODE
+                startActivity(
+                    Intent(this@MainActivity, MyProfileActivity::class.java)
                 )
             }
 
@@ -70,7 +69,7 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
                 // Here sign outs the user from firebase in this device.
                 FirebaseAuth.getInstance().signOut()
 
-                mSharedPreferences.edit().clear().apply()
+//                mSharedPreferences.edit().clear().apply()
 
                 // Send the user to the intro screen of the application.
                 val intent = Intent(this, IntroActivity::class.java)

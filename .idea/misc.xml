@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/ic_vector_add_24dp.xml" value="0.224" />
+        <entry key="app/src/main/res/drawable/ic_white_color_back_24dp.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/nav_header_main_background.xml" value="0.224" />
         <entry key="app/src/main/res/drawable/shape_button_rounded.xml" value="0.225" />
         <entry key="app/src/main/res/drawable/shape_dialog_rounded.xml" value="0.224" />
@@ -12,6 +13,7 @@
         <entry key="app/src/main/res/layout/activity_base.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/activity_intro.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/activity_my_profile.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.21822916666666667" />

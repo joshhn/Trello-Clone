@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.joshhn.trelloclone.activities.MainActivity
+import com.joshhn.trelloclone.activities.MyProfileActivity
 import com.joshhn.trelloclone.activities.SignInActivity
 import com.joshhn.trelloclone.activities.SignUpActivity
 import com.joshhn.trelloclone.models.User
@@ -36,7 +37,7 @@ class FirestoreClass {
             }
     }
 
-    fun signInUser(activity: Activity){
+    fun loadUserData(activity: Activity){
         mFireStore.collection(Constants.USERS)
             .document(getCurrentUserID())
             .get()
@@ -53,6 +54,11 @@ class FirestoreClass {
                     is MainActivity -> {
                         if(loggedInUser != null){
                             activity.updateNavigationUserDetails(loggedInUser)
+                        }
+                    }
+                    is MyProfileActivity -> {
+                        if (loggedInUser != null) {
+                            activity.setUserDataInUI(loggedInUser)
                         }
                     }
                 }
