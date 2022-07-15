@@ -13,6 +13,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.joshhn.trelloclone.R
 import com.joshhn.trelloclone.databinding.ActivitySignInBinding
+import com.joshhn.trelloclone.firebase.FirestoreClass
 import com.joshhn.trelloclone.models.User
 
 class SignInActivity : BaseActivity() {
@@ -64,21 +65,18 @@ class SignInActivity : BaseActivity() {
         val password: String = binding?.etPassword?.text.toString()
 
         if (validateForm(email, password)) {
-            // Show the progress dialog.
             showProgressDialog(resources.getString(R.string.please_wait))
 
-            auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this) { task ->
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d("Sign In", "createUserWithEmail:success")
-                        startActivity(Intent(this,MainActivity::class.java))
+                        // Calling the FirestoreClass signInUser function to get the data of user from database.
+                        FirestoreClass().loadUserData(this@SignInActivity)
                     } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w("Sign In", "createUserWithEmail:failure", task.exception)
                         Toast.makeText(
-                            baseContext, "Authentication failed.",
-                            Toast.LENGTH_SHORT
+                            this@SignInActivity,
+                            task.exception!!.message,
+                            Toast.LENGTH_LONG
                         ).show()
                     }
                 }

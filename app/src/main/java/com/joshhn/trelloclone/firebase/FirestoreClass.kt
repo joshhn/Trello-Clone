@@ -19,12 +19,9 @@ class FirestoreClass {
     fun registerUser(activity: SignUpActivity, userInfo: User) {
 
         mFireStore.collection(Constants.USERS)
-            // Document ID for users fields. Here the document it is the User ID.
             .document(getCurrentUserID())
-            // Here the userInfo are Field and the SetOption is set to merge. It is for if we wants to merge
             .set(userInfo, SetOptions.merge())
             .addOnSuccessListener {
-                // Here call a function of base activity for transferring the result to it.
                 activity.userRegisteredSuccess()
             }
             .addOnFailureListener { e ->
@@ -42,6 +39,7 @@ class FirestoreClass {
             .document(getCurrentUserID())
             .get()
             .addOnSuccessListener {document ->
+                Log.e(activity.javaClass.simpleName, document.toString())
                 val loggedInUser = document.toObject(User::class.java)
 
                 when(activity){
@@ -68,8 +66,10 @@ class FirestoreClass {
                     is SignInActivity -> {
                         activity.hideProgressDialog()
                     }
-
                     is MainActivity -> {
+                        activity.hideProgressDialog()
+                    }
+                    is MyProfileActivity -> {
                         activity.hideProgressDialog()
                     }
                 }
@@ -81,18 +81,49 @@ class FirestoreClass {
             }
     }
 
-
-
      fun getCurrentUserID(): String {
-        // An Instance of currentUser using FirebaseAuth
         val currentUser = FirebaseAuth.getInstance().currentUser
-
-        // A variable to assign the currentUserId if it is not null or else it will be blank.
         var currentUserID = ""
         if (currentUser != null) {
             currentUserID = currentUser.uid
         }
 
         return currentUserID
+    }
+
+    fun updateUserProfileData(activity: Activity, userHashMap: HashMap<String, Any>) {
+        mFireStore.collection(Constants.USERS)
+            .document(getCurrentUserID())
+            .update(userHashMap)
+            .addOnSuccessListener {
+                Log.i(activity.javaClass.simpleName, "Data updated successfully!")
+
+                // Notify the success result.
+
+                when (activity) {
+                    is MainActivity -> {
+                        activity.tokenUpdateSuccess()
+                    }
+                    is MyProfileActivity -> {
+                        activity.profileUpdateSuccess()
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                when (activity) {
+                    is MainActivity -> {
+                        activity.hideProgressDialog()
+                    }
+                    is MyProfileActivity -> {
+                        activity.hideProgressDialog()
+                    }
+                }
+
+                Log.e(
+                    activity.javaClass.simpleName,
+                    "Error while creating a board.",
+                    e
+                )
+            }
     }
 }

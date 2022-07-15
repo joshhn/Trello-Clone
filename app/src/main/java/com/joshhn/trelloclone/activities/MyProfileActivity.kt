@@ -7,14 +7,19 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.joshhn.trelloclone.R
 import com.joshhn.trelloclone.databinding.ActivityMyProfileBinding
 import com.joshhn.trelloclone.firebase.FirestoreClass
 import com.joshhn.trelloclone.models.User
+import com.joshhn.trelloclone.utils.Constants
 import java.io.IOException
 
 class MyProfileActivity :BaseActivity() {
@@ -28,6 +33,10 @@ class MyProfileActivity :BaseActivity() {
 
     private var binding: ActivityMyProfileBinding? = null
 
+    private var mProfileImageURL: String = ""
+
+    private lateinit var mUserDetails: User
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMyProfileBinding.inflate(layoutInflater)
@@ -40,7 +49,7 @@ class MyProfileActivity :BaseActivity() {
         binding?.ivProfileUserImage?.setOnClickListener {
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
-
+                Constants.showImageChooser(this@MyProfileActivity)
             }else{
                 ActivityCompat.requestPermissions(
                     this,
@@ -50,6 +59,15 @@ class MyProfileActivity :BaseActivity() {
             }
         }
 
+        binding?.tvUpdate?.setOnClickListener {
+
+            if (mSelectedImageFileUri != null) {
+                uploadUserImage()
+            } else {
+                showProgressDialog(resources.getString(R.string.please_wait))
+                updateUserProfileData()
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -61,7 +79,7 @@ class MyProfileActivity :BaseActivity() {
         if(requestCode == READ_STORAGE_PERMISSION_CODE){
             if(grantResults.isNotEmpty()
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                showImageChooser()
+                Constants.showImageChooser(this)
             }
         }else{
             Toast.makeText(
@@ -70,11 +88,6 @@ class MyProfileActivity :BaseActivity() {
                 Toast.LENGTH_LONG
             ).show()
         }
-    }
-
-    private fun showImageChooser() {
-        var galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST_CODE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -86,7 +99,7 @@ class MyProfileActivity :BaseActivity() {
 
             try {
                 Glide
-                    .with(this)
+                    .with(this@MyProfileActivity)
                     .load(mSelectedImageFileUri)
                     .centerCrop()
                     .placeholder(R.drawable.ic_user_place_holder)
@@ -115,6 +128,8 @@ class MyProfileActivity :BaseActivity() {
 
     fun setUserDataInUI(user: User){
 
+        mUserDetails = user
+
         val userImage = binding?.ivProfileUserImage
         val userName = binding?.etName
         val userEmail = binding?.etEmail
@@ -122,18 +137,77 @@ class MyProfileActivity :BaseActivity() {
 
         if (userImage != null) {
             Glide
-                .with(this)
-                .load(user.image)
+                .with(this@MyProfileActivity)
+                .load(mUserDetails.image)
                 .centerCrop()
                 .placeholder(R.drawable.ic_user_place_holder)
                 .into(userImage)
         }
-        userName?.setText(user.name)
-        userEmail?.setText(user.email)
-        if(user?.mobile != 0L){
-            userMobile?.setText(user.mobile.toString())
+        userName?.setText(mUserDetails.name)
+        userEmail?.setText(mUserDetails.email)
+        if(mUserDetails.mobile != 0L){
+            userMobile?.setText(mUserDetails.mobile.toString())
+        }
+    }
+
+    private fun uploadUserImage(){
+        showProgressDialog(resources.getString(R.string.please_wait))
+
+        if(mSelectedImageFileUri != null){
+            val sRef: StorageReference = FirebaseStorage.getInstance().reference
+                .child("USER_IMAGE" + System.currentTimeMillis() + "."+Constants.getFileExtension(this,mSelectedImageFileUri))
+
+            sRef.putFile(mSelectedImageFileUri!!).addOnSuccessListener { taskSnapshot ->
+                Log.i(
+                    "Firebase Image URL",
+                    taskSnapshot.metadata!!.reference!!.downloadUrl.toString()
+                )
+                taskSnapshot.metadata!!.reference!!.downloadUrl
+                    .addOnSuccessListener { uri ->
+                        Log.e("Downloadable Image URL", uri.toString())
+
+                        mProfileImageURL = uri.toString()
+
+                        updateUserProfileData()
+                    }
+            }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(
+                        this@MyProfileActivity,
+                        exception.message,
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    hideProgressDialog()
+                }
+            }
         }
 
+    private fun updateUserProfileData() {
+        val userHashMap = HashMap<String, Any>()
 
+
+        if (mProfileImageURL.isNotEmpty() && mProfileImageURL != mUserDetails.image) {
+            userHashMap[Constants.IMAGE] = mProfileImageURL
+        }
+
+        if (binding?.etName?.text.toString() != mUserDetails.name) {
+            userHashMap[Constants.NAME] = binding?.etName?.text.toString()
+        }
+
+        if (binding?.etMobile?.text.toString() != mUserDetails.mobile.toString()) {
+            userHashMap[Constants.MOBILE] = binding?.etMobile?.text.toString().toLong()
+        }
+
+        FirestoreClass().updateUserProfileData(this@MyProfileActivity, userHashMap)
+    }
+
+    fun profileUpdateSuccess(){
+        hideProgressDialog()
+
+        Toast.makeText(this@MyProfileActivity, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
+
+        setResult(Activity.RESULT_OK)
+        finish()
     }
 }
