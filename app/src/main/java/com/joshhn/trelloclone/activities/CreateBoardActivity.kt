@@ -5,10 +5,9 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
-import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -16,35 +15,34 @@ import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.joshhn.trelloclone.R
-import com.joshhn.trelloclone.databinding.ActivityMyProfileBinding
+import com.joshhn.trelloclone.databinding.ActivityCreateBoardBinding
 import com.joshhn.trelloclone.firebase.FirestoreClass
-import com.joshhn.trelloclone.models.User
+import com.joshhn.trelloclone.models.Board
 import com.joshhn.trelloclone.utils.Constants
 import java.io.IOException
 
-class MyProfileActivity :BaseActivity() {
+class CreateBoardActivity : BaseActivity() {
 
-    private var mSelectedImageFileUri: Uri? = null
-
-    private var binding: ActivityMyProfileBinding? = null
-
-    private var mProfileImageURL: String = ""
-
-    private lateinit var mUserDetails: User
+    private var binding : ActivityCreateBoardBinding? = null
+    private var mSelectedImageFileUri : Uri? = null
+    private lateinit var mUserName: String
+    private var mBoardImageURL: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMyProfileBinding.inflate(layoutInflater)
+        binding = ActivityCreateBoardBinding.inflate(layoutInflater)
         setContentView(binding?.root)
 
         setupActionBar()
 
-        FirestoreClass().loadUserData(this)
+        if(intent.hasExtra(Constants.NAME)){
+            mUserName = intent.getStringExtra(Constants.NAME).toString()
+        }
 
-        binding?.ivProfileUserImage?.setOnClickListener {
+        binding?.ivBoardImage?.setOnClickListener {
 
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED){
-                Constants.showImageChooser(this@MyProfileActivity)
+                Constants.showImageChooser(this@CreateBoardActivity)
             }else{
                 ActivityCompat.requestPermissions(
                     this,
@@ -54,14 +52,28 @@ class MyProfileActivity :BaseActivity() {
             }
         }
 
-        binding?.tvUpdate?.setOnClickListener {
-
-            if (mSelectedImageFileUri != null) {
-                uploadUserImage()
-            } else {
+        binding?.tvCreate?.setOnClickListener {
+            if(mSelectedImageFileUri != null){
+                uploadBoardImage()
+            }else{
                 showProgressDialog(resources.getString(R.string.please_wait))
-                updateUserProfileData()
+                createBoard()
             }
+        }
+    }
+
+    private fun setupActionBar(){
+        setSupportActionBar(binding?.toolbarCreateBoardActivity)
+
+        val actionBar = supportActionBar
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_black_color_back_24dp)
+            actionBar.title = resources.getString(R.string.create_board_title)
+        }
+
+        binding?.toolbarCreateBoardActivity?.setNavigationOnClickListener {
+            onBackPressed()
         }
     }
 
@@ -94,115 +106,70 @@ class MyProfileActivity :BaseActivity() {
 
             try {
                 Glide
-                    .with(this@MyProfileActivity)
+                    .with(this@CreateBoardActivity)
                     .load(mSelectedImageFileUri)
                     .centerCrop()
-                    .placeholder(R.drawable.ic_user_place_holder)
-                    .into(binding?.ivProfileUserImage!!)
+                    .placeholder(R.drawable.ic_board_place_holder)
+                    .into(binding?.ivBoardImage!!)
             }catch (e: IOException){
                 e.printStackTrace()
-        }
-        }
-    }
-
-
-    private fun setupActionBar(){
-        setSupportActionBar(binding?.toolbarMyProfileActivity)
-
-        val actionBar = supportActionBar
-        if(actionBar != null){
-            actionBar.setDisplayHomeAsUpEnabled(true)
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_white_color_back_24dp)
-            actionBar.title = resources.getString(R.string.my_profile)
-        }
-
-        binding?.toolbarMyProfileActivity?.setNavigationOnClickListener {
-            onBackPressed()
+            }
         }
     }
 
-    fun setUserDataInUI(user: User){
+    private fun createBoard(){
+        val assignedUserArrayList: ArrayList<String> = ArrayList()
+        assignedUserArrayList.add(getCurrentUserID())
 
-        mUserDetails = user
+        var board = Board(
+            binding?.etBoardName?.text.toString(),
+            mBoardImageURL,
+            mUserName,
+            assignedUserArrayList
+        )
 
-        val userImage = binding?.ivProfileUserImage
-        val userName = binding?.etName
-        val userEmail = binding?.etEmail
-        val userMobile = binding?.etMobile
-
-        if (userImage != null) {
-            Glide
-                .with(this@MyProfileActivity)
-                .load(mUserDetails.image)
-                .centerCrop()
-                .placeholder(R.drawable.ic_user_place_holder)
-                .into(userImage)
-        }
-        userName?.setText(mUserDetails.name)
-        userEmail?.setText(mUserDetails.email)
-        if(mUserDetails.mobile != 0L){
-            userMobile?.setText(mUserDetails.mobile.toString())
-        }
+        FirestoreClass().createBoard(this@CreateBoardActivity, board)
     }
 
-    private fun uploadUserImage(){
+    private fun uploadBoardImage(){
         showProgressDialog(resources.getString(R.string.please_wait))
 
         if(mSelectedImageFileUri != null){
             val sRef: StorageReference = FirebaseStorage.getInstance().reference
-                .child("USER_IMAGE" + System.currentTimeMillis() + "."+Constants.getFileExtension(this,mSelectedImageFileUri))
+                .child("BOARD_IMAGE" + System.currentTimeMillis() + "."+Constants.getFileExtension(this,mSelectedImageFileUri))
 
             sRef.putFile(mSelectedImageFileUri!!).addOnSuccessListener { taskSnapshot ->
                 Log.i(
-                    "Firebase Image URL",
+                    "Board Image URL",
                     taskSnapshot.metadata!!.reference!!.downloadUrl.toString()
                 )
                 taskSnapshot.metadata!!.reference!!.downloadUrl
                     .addOnSuccessListener { uri ->
                         Log.e("Downloadable Image URL", uri.toString())
 
-                        mProfileImageURL = uri.toString()
+                        mBoardImageURL = uri.toString()
 
-                        updateUserProfileData()
+                        createBoard()
                     }
             }
                 .addOnFailureListener { exception ->
                     Toast.makeText(
-                        this@MyProfileActivity,
+                        this@CreateBoardActivity,
                         exception.message,
                         Toast.LENGTH_LONG
                     ).show()
 
                     hideProgressDialog()
                 }
-            }
         }
-
-    private fun updateUserProfileData() {
-        val userHashMap = HashMap<String, Any>()
-
-
-        if (mProfileImageURL.isNotEmpty() && mProfileImageURL != mUserDetails.image) {
-            userHashMap[Constants.IMAGE] = mProfileImageURL
-        }
-
-        if (binding?.etName?.text.toString() != mUserDetails.name) {
-            userHashMap[Constants.NAME] = binding?.etName?.text.toString()
-        }
-
-        if (binding?.etMobile?.text.toString() != mUserDetails.mobile.toString()) {
-            userHashMap[Constants.MOBILE] = binding?.etMobile?.text.toString().toLong()
-        }
-
-        FirestoreClass().updateUserProfileData(this@MyProfileActivity, userHashMap)
     }
 
-    fun profileUpdateSuccess(){
+    fun boardCreatedSuccessfully(){
         hideProgressDialog()
-
-        Toast.makeText(this@MyProfileActivity, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
 
         setResult(Activity.RESULT_OK)
         finish()
     }
+
+
 }

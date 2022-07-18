@@ -11,6 +11,7 @@
         <entry key="app/src/main/res/drawable/white_border_shape_button_rounded.xml" value="0.224" />
         <entry key="app/src/main/res/layout-v23/activity_intro.xml" value="0.2171875" />
         <entry key="app/src/main/res/layout/activity_base.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/activity_create_board.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/activity_intro.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/activity_my_profile.xml" value="0.21822916666666667" />
@@ -19,6 +20,7 @@
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/app_bar_main.xml" value="0.2171875" />
         <entry key="app/src/main/res/layout/dialog_progress.xml" value="0.2171875" />
+        <entry key="app/src/main/res/layout/item_board.xml" value="0.2171875" />
         <entry key="app/src/main/res/layout/main_content.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/nav_header_main.xml" value="0.2" />
         <entry key="app/src/main/res/menu/activity_main_drawer.xml" value="0.2171875" />
