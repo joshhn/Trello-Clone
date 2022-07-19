@@ -153,7 +153,7 @@ class FirestoreClass {
             .whereArrayContains(Constants.ASSIGNED_TO, getCurrentUserID())
             .get()
             .addOnSuccessListener { document ->
-                Log.e(activity.javaClass.simpleName, document.documents.toString())
+                Log.i(activity.javaClass.simpleName, document.documents.toString())
                 val boardsList: ArrayList<Board> = ArrayList()
 
                 for (i in document.documents) {
@@ -170,4 +170,40 @@ class FirestoreClass {
                 Log.e(activity.javaClass.simpleName, "Error while creating a board.", e)
             }
     }
+
+    fun getBoardDetails(activity: TaskListActivity, documentId: String ){
+        mFireStore.collection(Constants.BOARDS)
+            .document(documentId)
+            .get()
+            .addOnSuccessListener { document ->
+                Log.i(activity.javaClass.simpleName, document.toString())
+                val board = document.toObject(Board::class.java)!!
+                board.documentId = document.id
+                activity.boardDetails(board)
+            }
+            .addOnFailureListener { e ->
+
+                activity.hideProgressDialog()
+                Log.e(activity.javaClass.simpleName, "Error while creating a board.", e)
+            }
+    }
+
+    fun addUpdateTaskList(activity: TaskListActivity, board: Board){
+        val taskListHashMap = HashMap<String,Any>()
+        taskListHashMap[Constants.TASK_LIST] = board.taskList
+
+        mFireStore.collection(Constants.BOARDS)
+            .document(board.documentId)
+            .update(taskListHashMap)
+            .addOnSuccessListener { document ->
+                Log.e(activity.javaClass.simpleName, "TaskList updated successfully!")
+
+                activity.addUpdateTaskListSuccess()
+            }
+            .addOnFailureListener { e ->
+                activity.hideProgressDialog()
+                Log.e(activity.javaClass.simpleName, "Error while creating a board.", e)
+            }
+    }
+    
 }

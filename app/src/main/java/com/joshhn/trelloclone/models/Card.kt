@@ -3,39 +3,36 @@ package com.joshhn.trelloclone.models
 import android.os.Parcel
 import android.os.Parcelable
 
-data class Board(
+data class Card(
     val name: String = "",
-    val image: String = "",
     val createdBy: String = "",
     val assignedTo: ArrayList<String> = ArrayList(),
-    var documentId: String = "",
-    var taskList: ArrayList<Task> = ArrayList()
-):Parcelable {
+    val labelColor: String = "",
+    val dueDate: Long = 0
+) : Parcelable {
     constructor(source: Parcel) : this(
-        source.readString()!!,
         source.readString()!!,
         source.readString()!!,
         source.createStringArrayList()!!,
         source.readString()!!,
-        source.createTypedArrayList(Task.CREATOR)!!
+        source.readLong()
     )
 
     override fun describeContents() = 0
 
     override fun writeToParcel(dest: Parcel, flags: Int) = with(dest) {
         writeString(name)
-        writeString(image)
         writeString(createdBy)
         writeStringList(assignedTo)
-        writeString(documentId)
-        writeTypedList(taskList)
+        writeString(labelColor)
+        writeLong(dueDate)
     }
 
     companion object {
         @JvmField
-        val CREATOR: Parcelable.Creator<Board> = object : Parcelable.Creator<Board> {
-            override fun createFromParcel(source: Parcel): Board = Board(source)
-            override fun newArray(size: Int): Array<Board?> = arrayOfNulls(size)
+        val CREATOR: Parcelable.Creator<Card> = object : Parcelable.Creator<Card> {
+            override fun createFromParcel(source: Parcel): Card = Card(source)
+            override fun newArray(size: Int): Array<Card?> = arrayOfNulls(size)
         }
     }
 }

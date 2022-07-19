@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -161,22 +162,31 @@ class MainActivity : BaseActivity(), NavigationView.OnNavigationItemSelectedList
 //        FirestoreClass().loadUserData(this@MainActivity, true)
     }
 
-    fun populateBoardsListToUI(boardList: ArrayList<Board>){
+    fun populateBoardsListToUI(boardsList: ArrayList<Board>){
         hideProgressDialog()
-        val mainContentBinding = MainContentBinding.inflate(layoutInflater)
+        val rvBoardsList : RecyclerView = findViewById(R.id.rv_boards_list)
+        val tvNoBoardsAvailable : TextView = findViewById(R.id.tv_no_boards_available)
 
-        if(boardList.size >0){
-            mainContentBinding.rvBoardsList.visibility = View.VISIBLE
-            mainContentBinding.tvNoBoardsAvailable.visibility = View.GONE
+        if(boardsList.size > 0){
+            rvBoardsList.visibility = View.VISIBLE
+            tvNoBoardsAvailable.visibility = View.GONE
 
-            mainContentBinding.rvBoardsList.layoutManager = LinearLayoutManager(this)
-            mainContentBinding.rvBoardsList.setHasFixedSize(true)
+            rvBoardsList.layoutManager = LinearLayoutManager(this)
+            rvBoardsList.setHasFixedSize(true)
 
-            val adapter = BoardItemsAdapter(this, boardList)
-            mainContentBinding.rvBoardsList.adapter = adapter
+            val adapter = BoardItemsAdapter(this, boardsList)
+            rvBoardsList.adapter = adapter
+
+            adapter.setOnClickListener(object: BoardItemsAdapter.OnClickListener{
+                override fun onClick(position: Int, model: Board) {
+                    val intent = Intent(this@MainActivity,TaskListActivity::class.java)
+                    intent.putExtra(Constants.DOCUMENT_ID, model.documentId)
+                    startActivity(intent)
+                }
+            })
         }else{
-            mainContentBinding.rvBoardsList.visibility = View.GONE
-            mainContentBinding.tvNoBoardsAvailable.visibility = View.VISIBLE
+            rvBoardsList.visibility = View.GONE
+            tvNoBoardsAvailable.visibility = View.VISIBLE
         }
     }
 }
