@@ -1,11 +1,14 @@
 package com.joshhn.trelloclone.adapters
 
 import android.content.Context
+import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.joshhn.trelloclone.activities.TaskListActivity
 import com.joshhn.trelloclone.databinding.ItemTaskBinding
@@ -28,6 +31,13 @@ open class TaskListItemsAdapter(private val context: Context, private var list: 
         val ibCloseEditableView = binding.ibCloseEditableView
         val ibDoneEditListName = binding.ibDoneEditListName
         val ibDeleteList = binding.ibDeleteList
+        val tvAddCard = binding. tvAddCard
+        val cvAddCard = binding.cvAddCard
+        val ibCloseCardName = binding.ibCloseCardName
+        val ibDoneCardName= binding.ibDoneCardName
+        val etCardName = binding.etCardName
+        val rvCardList = binding.rvCardList
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -98,6 +108,34 @@ open class TaskListItemsAdapter(private val context: Context, private var list: 
             holder.ibDeleteList.setOnClickListener {
                 alertDialogForDeleteList(position, model.title)
             }
+
+            holder.tvAddCard.setOnClickListener {
+                holder.tvAddCard.visibility = View.GONE
+                holder.cvAddCard.visibility = View.VISIBLE
+            }
+
+            holder.ibCloseCardName.setOnClickListener {
+                holder.tvAddCard.visibility = View.VISIBLE
+                holder.cvAddCard.visibility = View.GONE
+            }
+
+            holder.ibDoneCardName.setOnClickListener {
+                val cardName = holder.etCardName.text.toString()
+
+                if(cardName.isNotEmpty()){
+                    if(context is TaskListActivity){
+                        context.addCardToTaskList(position,cardName)
+                    }
+                }else{
+                    Toast.makeText(context,"Please Enter a Card name.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            holder.rvCardList.layoutManager = LinearLayoutManager(context)
+            holder.rvCardList.setHasFixedSize(true)
+
+            val adapter = CardListItemsAdapter(context, model.cards)
+            holder.rvCardList.adapter = adapter
         }
     }
 
@@ -105,9 +143,9 @@ open class TaskListItemsAdapter(private val context: Context, private var list: 
         return list.size
     }
 
-//    private fun Int.toDp(): Int =  (this / Resources.getSystem().displayMetrics.density).toInt()
-//
-//    private fun Int.toPx(): Int =  (this * Resources.getSystem().displayMetrics.density).toInt()
+    private fun Int.toDp(): Int =  (this / Resources.getSystem().displayMetrics.density).toInt()
+
+    private fun Int.toPx(): Int =  (this * Resources.getSystem().displayMetrics.density).toInt()
 
     private fun alertDialogForDeleteList(position: Int, title: String) {
         val builder = AlertDialog.Builder(context)
