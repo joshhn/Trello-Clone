@@ -1,5 +1,6 @@
 package com.joshhn.trelloclone.activities
 
+import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
 import android.view.Menu
@@ -20,6 +21,7 @@ class MembersActivity : BaseActivity() {
     private var binding : ActivityMembersBinding? = null
     private lateinit var mBoardDetails : Board
     private lateinit var mAssignedMembersList: ArrayList<User>
+    private var anyChangeMade: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +51,13 @@ class MembersActivity : BaseActivity() {
         binding?.toolbarMembersActivity?.setNavigationOnClickListener {
             onBackPressed()
         }
+    }
+
+    override fun onBackPressed() {
+        if(anyChangeMade){
+            setResult(Activity.RESULT_OK)
+        }
+        super.onBackPressed()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -112,6 +121,9 @@ class MembersActivity : BaseActivity() {
     fun memberAssignSuccess(user: User){
         hideProgressDialog()
         mAssignedMembersList.add(user)
+
+        anyChangeMade = true
+
         setupMembersList(mAssignedMembersList)
     }
 }
