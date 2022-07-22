@@ -157,7 +157,6 @@ open class TaskListItemsAdapter(private val context: Context, private var list: 
                 DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
             holder.rvCardList.addItemDecoration(dividerItemDecoration)
 
-            //  Creates an ItemTouchHelper that will work with the given Callback.
             val helper = ItemTouchHelper(object :
                 ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
 
