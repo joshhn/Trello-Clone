@@ -20,6 +20,9 @@ import kotlin.collections.ArrayList
 
 open class TaskListItemsAdapter(private val context: Context, private var list: ArrayList<Task>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private car mPositionDraggedFrom = -1
+    private var mPositionDraggedTo = -1
+
     class MyViewHolder(binding: ItemTaskBinding): RecyclerView.ViewHolder(binding.root){
         val tvAddTaskList = binding.tvAddTaskList
         val llTaskItem = binding.llTaskItem
